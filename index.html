@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airport Simulation</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          margin: 20px;
+      }
+      .container {
+          max-width: 800px;
+          margin: auto;
+      }
+      label {
+          font-weight: bold;
+      }
+      input, select {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 20px;
+      }
+      button {
+          padding: 10px 20px;
+          background-color: #007BFF;
+          color: white;
+          border: none;
+          cursor: pointer;
+      }
+      button:hover {
+          background-color: #0056b3;
+      }
+      .results {
+          margin-top: 20px;
+          padding: 10px;
+          border: 1px solid #ccc;
+          background-color: #f9f9f9;
+      }
+      .results h3 {
+          margin-top: 0;
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Airport Simulation</h1>
+  
+  <label for="terminal">Select Terminal:</label>
+  <select id="terminal">
+      <option value="Terminal B">Terminal B</option>
+      <option value="T1">T1</option>
+      <option value="T2">T2</option>
+      <option value="T3">T3</option>
+      <!-- Add more terminals as needed -->
+  </select>
+
+  <label for="num_counters">Number of Counters:</label>
+  <input type="number" id="num_counters" value="5">
+
+  <label for="sim_duration">Simulation Duration (minutes):</label>
+  <input type="number" id="sim_duration" value="960">
+
+  <button onclick="runSimulation()">Run Simulation</button>
+
+  <div class="results" id="results" style="display:none;">
+      <h3>Simulation Results:</h3>
+      <p id="max_queue_lengths"></p>
+      <p id="average_service_time"></p>
+      <p id="average_wait_time"></p>
+      <p id="counter_utilization"></p>
+  </div>
+</div>
+
+<script>
+async function runSimulation() {
+    const terminal = document.getElementById("terminal").value;
+    const numCounters = document.getElementById("num_counters").value;
+    const simDuration = document.getElementById("sim_duration").value;
+
+    const response = await fetch("http://127.0.0.1:5000/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            terminal,
+            num_counters: numCounters,
+            sim_duration: simDuration,
+        }),
+    });
+
+    const data = await response.json();
+
+    document.getElementById("results").style.display = "block";
+    document.getElementById("max_queue_lengths").innerText =
+        `Max Queue Lengths per Counter: ${data.max_queue_lengths}`;
+    document.getElementById("average_service_time").innerText =
+        `Average Service Time: ${data.average_service_time} mins`;
+    document.getElementById("average_wait_time").innerText =
+        `Average Wait Time: ${data.average_wait_time} mins`;
+    document.getElementById("counter_utilization").innerText =
+        `Counter Utilization (%): ${data.counter_utilization.map(u => u.toFixed(2)).join(", ")}`;
+}
+</script>
+</body>
+</html>
+
